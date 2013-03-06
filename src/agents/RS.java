@@ -14,7 +14,6 @@ public final class RS {
 
 	public static boolean prints = true;
 
-
 	public static void send(Agent agent, AID receipt, String content, int type) {
 		ACLMessage reply = new ACLMessage(type);
 		reply.setContent(content);
