@@ -1,19 +1,19 @@
 package agents;
 
-import jade.core.Agent;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.wrapper.ControllerException;
+import agents.behaviours.Buy;
+import agents.behaviours.Sell;
 
 @SuppressWarnings("serial")
-public class AssemblerAgent extends Agent {
+public class AssemblerAgent extends TradingAgent {
 
 	// método setup
 	protected void setup() {
 		// regista agente no DF
 		try {
-			RS.registerAgent(this, "Assembler");
+			RS.registerAgent(this, RS.assembler);
 		} catch (ControllerException e) {
 			e.printStackTrace();
 			return;
@@ -22,18 +22,8 @@ public class AssemblerAgent extends Agent {
 			return;
 		}
 
-		addBehaviour(new SimpleBehaviour(this) {
-			int n = 0;
-
-			public void action() {
-				System.out.println("I am an assembler, my name is " + myAgent.getLocalName() + " " + n);
-				n++;
-			}
-
-			public boolean done() {
-				return n >= 3;
-			}
-		});
+		addBehaviour(new Sell(this));
+		addBehaviour(new Buy(this, RS.supplier));
 	}
 
 	@Override

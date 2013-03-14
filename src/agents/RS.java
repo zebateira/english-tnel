@@ -12,6 +12,10 @@ import jade.wrapper.ControllerException;
 
 public final class RS {
 
+	public static String supplier = "suplier";
+	public static String assembler = "assembler";
+	public static String client = "client";
+
 	public static boolean prints = true;
 
 	public static void send(Agent agent, AID receipt, String content, int type) {
@@ -42,21 +46,5 @@ public final class RS {
 		dfd.addServices(sd);
 
 		DFService.register(requester, dfd);
-	}
-
-	public static String checkContent(ACLMessage msg, int type, String subject) {
-		if (msg == null)
-			return null;
-
-		if (msg.getPerformative() != type)
-			return null;
-
-		if (!msg.getContent().contains(subject))
-			return null;
-
-		if (msg.getContent().split(subject).length > 1)
-			return msg.getContent().split(subject)[1];
-		else
-			return "";
 	}
 }

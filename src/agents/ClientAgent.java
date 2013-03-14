@@ -1,19 +1,18 @@
 package agents;
 
-import jade.core.Agent;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.wrapper.ControllerException;
+import agents.behaviours.Buy;
 
 @SuppressWarnings("serial")
-public class TestAgent extends Agent {
+public class ClientAgent extends TradingAgent {
 
 	// método setup
 	protected void setup() {
 		// regista agente no DF
 		try {
-			RS.registerAgent(this, "Test");
+			RS.registerAgent(this, RS.client);
 		} catch (ControllerException e) {
 			e.printStackTrace();
 			return;
@@ -22,23 +21,12 @@ public class TestAgent extends Agent {
 			return;
 		}
 
-		addBehaviour(new SimpleBehaviour(this) {
-			int n = 0;
-
-			public void action() {
-				System.out.println("Hello World! My name is " + myAgent.getLocalName() + " " + n);
-				n++;
-			}
-
-			public boolean done() {
-				return n >= 3;
-			}
-		});
+		addBehaviour(new Buy(this, RS.assembler));
 	}
 
 	@Override
 	protected void takeDown() {
-		System.out.println(this.getLocalName() + ": " + "Im out!\n");
+		System.out.println(this.getLocalName() + ": " + "Buyer out!\n");
 		try {
 			DFService.deregister(this);
 		} catch (Exception e) {
