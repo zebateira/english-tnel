@@ -12,18 +12,26 @@ import jade.wrapper.ControllerException;
 
 public final class RS {
 
-	public static String supplier = "suplier";
-	public static String assembler = "assembler";
-	public static String client = "client";
-	public static String itemSep = "|";
-	public static String propSep = ";";
+	public static String	supplier	= "suplier";
+	public static String	assembler	= "assembler";
+	public static String	client		= "client";
+	public static String	itemSep		= "|";
+	public static String	propSep		= ";";
 
-	public static boolean prints = true;
+	public static boolean	prints		= true;
 
 	public static void send(Agent agent, AID receipt, String content, int type) {
 		ACLMessage reply = new ACLMessage(type);
 		reply.setContent(content);
 		reply.addReceiver(receipt);
+		agent.send(reply);
+	}
+
+	public static void send(Agent agent, AID receipt, String content, int type, String inReplyTo) {
+		ACLMessage reply = new ACLMessage(type);
+		reply.setContent(content);
+		reply.addReceiver(receipt);
+		reply.setInReplyTo(inReplyTo);
 		agent.send(reply);
 	}
 

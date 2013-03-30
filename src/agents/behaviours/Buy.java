@@ -22,12 +22,13 @@ public class Buy extends CyclicBehaviour {
 
 	@Override
 	public void action() {
+		//System.out.println(agent.getName() + " buy " + agent.getQueueSize());
 		try {
 			DFAgentDescription[] sellers = RS.search(agent, sellerType);
 			if (sellers.length > 0) {
 				for (DFAgentDescription ag : sellers) {
-					RS.send(agent, ag.getName(), "", ACLMessage.CFP);
-					ACLMessage message = agent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchSender(ag.getName()), MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE), MessageTemplate.MatchPerformative(ACLMessage.INFORM))));
+					RS.send(agent, ag.getName(), "", ACLMessage.CFP, item.toString());
+					ACLMessage message = agent.receive(MessageTemplate.MatchInReplyTo(item.toString()));
 					if (message != null) {
 						if (message.getPerformative() == ACLMessage.PROPOSE) {
 							synchronized (agent.storage) {
