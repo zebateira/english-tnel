@@ -28,8 +28,11 @@ public class ClientAgent extends TradingAgent {
 		}
 
 		storage = new HashMap<Item, Integer>();
-		storage.put(Item.MOTHERBOARD, 0);
-		addBehaviour(new Buy(this, RS.assembler, Item.MOTHERBOARD));
+		for (Object s : getArguments()) {
+			Item item = Item.valueOf((String) s);
+			storage.put(item, 0);
+			addBehaviour(new Buy(this, RS.assembler, item));
+		}
 	}
 
 	@Override

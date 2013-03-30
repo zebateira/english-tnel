@@ -1,9 +1,8 @@
 package agents.goods;
 
 public enum Item {
-	MOTHERBOARD(100);
-
-	int value;
+	MOTHERBOARD(60), CPU(100), RAM(50);
+	public final int	value;
 
 	Item(int value) {
 		this.value = value;

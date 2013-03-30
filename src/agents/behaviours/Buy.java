@@ -26,17 +26,17 @@ public class Buy extends CyclicBehaviour {
 			DFAgentDescription[] sellers = RS.search(agent, sellerType);
 			if (sellers.length > 0) {
 				for (DFAgentDescription ag : sellers) {
-					RS.send(agent, ag.getName(), "buy", 0);
-					ACLMessage message = agent.blockingReceive(MessageTemplate.MatchSender(ag.getName()));
+					RS.send(agent, ag.getName(), "", ACLMessage.CFP);
+					ACLMessage message = agent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchSender(ag.getName()), MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE), MessageTemplate.MatchPerformative(ACLMessage.INFORM))));
 					if (message != null) {
-						if (message.getContent().contains("sell")) {
+						if (message.getPerformative() == ACLMessage.PROPOSE) {
 							synchronized (agent.storage) {
 								agent.storage.put(item, agent.storage.get(item) + 1);
 								System.err.println(agent.getLocalName() + " Bought, now have" + agent.storage);
 								System.err.flush();
 							}
 						}
-						else if (message.getContent().contains("empty")) {
+						else if (message.getPerformative() == ACLMessage.INFORM) {
 							// não há nada lá...
 						}
 					}

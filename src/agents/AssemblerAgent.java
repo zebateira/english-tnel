@@ -29,9 +29,12 @@ public class AssemblerAgent extends TradingAgent {
 		}
 
 		storage = new HashMap<Item, Integer>();
-		storage.put(Item.MOTHERBOARD, 0);
-		addBehaviour(new Sell(this, Item.MOTHERBOARD));
-		addBehaviour(new Buy(this, RS.supplier, Item.MOTHERBOARD));
+		for (Object s : getArguments()) {
+			Item item = Item.valueOf((String) s);
+			storage.put(item, 0);
+			addBehaviour(new Sell(this, item));
+			addBehaviour(new Buy(this, RS.supplier, item));
+		}
 	}
 
 	@Override
