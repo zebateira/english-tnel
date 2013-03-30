@@ -1,33 +1,32 @@
 package agents.behaviours;
 
-import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import agents.RS;
 import agents.TradingAgent;
+import agents.goods.Item;
 
-public class Sell extends SimpleBehaviour {
-	TradingAgent agent;
-	boolean sold = false;
+public class Sell extends CyclicBehaviour {
+	final TradingAgent	agent;
+	final Item			item;
 
-	public Sell(TradingAgent agent) {
+	public Sell(TradingAgent agent, Item item) {
 		this.agent = agent;
+		this.item = item;
 	}
 
 	@Override
 	public void action() {
 		ACLMessage message = agent.receive();
-		if (message != null && message.getContent().contains("buy") && agent.storage >= 1) {
-			RS.send(agent, message.getSender(), "sell", 0);
-			agent.storage++;
-			sold = true;
+		if (message != null && message.getContent().contains("buy")) {
+			synchronized (agent) {
+				if (agent.storage.get(item) > 0) {
+					RS.send(agent, message.getSender(), "sell", 0);
+					agent.storage.put(item, agent.storage.get(item) - 1);
+					System.out.println(agent.getLocalName() + " Sold, now have " + agent.storage);
+				}
+			}
 		}
-	}
-
-	@Override
-	public boolean done() {
-		if (sold)
-			System.out.println(agent.getLocalName() + " Sold");
-		return sold;
 	}
 
 }

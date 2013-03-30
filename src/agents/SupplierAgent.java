@@ -3,7 +3,11 @@ package agents;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.wrapper.ControllerException;
+
+import java.util.HashMap;
+
 import agents.behaviours.Sell;
+import agents.goods.Item;
 
 @SuppressWarnings("serial")
 public class SupplierAgent extends TradingAgent {
@@ -21,9 +25,10 @@ public class SupplierAgent extends TradingAgent {
 			return;
 		}
 
-		storage = 1;
+		storage = new HashMap<Item, Integer>();
+		storage.put(Item.MOTHERBOARD, 3);
 
-		addBehaviour(new Sell(this));
+		addBehaviour(new Sell(this, Item.MOTHERBOARD));
 	}
 
 	@Override

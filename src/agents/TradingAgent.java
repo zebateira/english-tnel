@@ -2,6 +2,10 @@ package agents;
 
 import jade.core.Agent;
 
-public class TradingAgent extends Agent {
-	public int storage = 0;
+import java.util.HashMap;
+
+import agents.goods.Item;
+
+public abstract class TradingAgent extends Agent {
+	public HashMap<Item, Integer> storage;
 }

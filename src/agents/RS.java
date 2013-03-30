@@ -15,6 +15,8 @@ public final class RS {
 	public static String supplier = "suplier";
 	public static String assembler = "assembler";
 	public static String client = "client";
+	public static String itemSep = "|";
+	public static String propSep = ";";
 
 	public static boolean prints = true;
 
