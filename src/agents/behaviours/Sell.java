@@ -26,6 +26,8 @@ public class Sell extends CyclicBehaviour {
 					System.out.println(agent.getLocalName() + " Sold, now have " + agent.storage);
 					System.out.flush();
 				}
+				else
+					RS.send(agent, message.getSender(), "empty", 0);
 			}
 		}
 	}
