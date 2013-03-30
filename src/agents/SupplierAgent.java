@@ -17,16 +17,18 @@ public class SupplierAgent extends TradingAgent {
 		// regista agente no DF
 		try {
 			RS.registerAgent(this, RS.supplier);
-		} catch (ControllerException e) {
+		}
+		catch (ControllerException e) {
 			e.printStackTrace();
 			return;
-		} catch (FIPAException e) {
+		}
+		catch (FIPAException e) {
 			e.printStackTrace();
 			return;
 		}
 
 		storage = new HashMap<Item, Integer>();
-		storage.put(Item.MOTHERBOARD, 3);
+		storage.put(Item.MOTHERBOARD, 4);
 
 		addBehaviour(new Sell(this, Item.MOTHERBOARD));
 	}
@@ -36,8 +38,8 @@ public class SupplierAgent extends TradingAgent {
 		System.out.println(this.getLocalName() + ": " + "Supplier out!\n");
 		try {
 			DFService.deregister(this);
-		} catch (Exception e) {
 		}
+		catch (Exception e) {}
 	}
 
 }

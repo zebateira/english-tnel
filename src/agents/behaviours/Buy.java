@@ -9,9 +9,9 @@ import agents.TradingAgent;
 import agents.goods.Item;
 
 public class Buy extends CyclicBehaviour {
-	final TradingAgent agent;
-	String sellerType;
-	final Item item;
+	final TradingAgent	agent;
+	String				sellerType;
+	final Item			item;
 
 	public Buy(TradingAgent agent, String seller, Item item) {
 		this.agent = agent;
@@ -25,15 +25,16 @@ public class Buy extends CyclicBehaviour {
 			DFAgentDescription[] sellers = RS.search(agent, sellerType);
 			if (sellers.length > 0) {
 				RS.send(agent, sellers[0].getName(), "buy", 0);
-				ACLMessage message = agent.receive();
+				ACLMessage message = agent.blockingReceive();
 				if (message != null && message.getContent().contains("sell")) {
-					synchronized (agent) {
+					synchronized (agent.storage) {
 						agent.storage.put(item, agent.storage.get(item) + 1);
-						System.out.println(agent.getLocalName() + " Bought, now have" + agent.storage);
+						System.err.println(agent.getLocalName() + " Bought, now have" + agent.storage);
+						System.err.flush();
 					}
 				}
 			}
-		} catch (FIPAException e) {
 		}
+		catch (FIPAException e) {}
 	}
 }
