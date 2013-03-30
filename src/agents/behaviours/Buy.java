@@ -25,7 +25,7 @@ public class Buy extends CyclicBehaviour {
 			DFAgentDescription[] sellers = RS.search(agent, sellerType);
 			if (sellers.length > 0) {
 				RS.send(agent, sellers[0].getName(), "buy", 0);
-				ACLMessage message = agent.blockingReceive();
+				ACLMessage message = agent.receive();
 				if (message != null && message.getContent().contains("sell")) {
 					synchronized (agent.storage) {
 						agent.storage.put(item, agent.storage.get(item) + 1);

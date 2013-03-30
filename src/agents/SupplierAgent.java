@@ -28,7 +28,7 @@ public class SupplierAgent extends TradingAgent {
 		}
 
 		storage = new HashMap<Item, Integer>();
-		storage.put(Item.MOTHERBOARD, 4);
+		storage.put(Item.MOTHERBOARD, 3);
 
 		addBehaviour(new Sell(this, Item.MOTHERBOARD));
 	}
