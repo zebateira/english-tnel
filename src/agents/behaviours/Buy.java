@@ -9,26 +9,28 @@ import agents.RS;
 import agents.TradingAgent;
 import agents.goods.Item;
 
+@SuppressWarnings("serial")
 public class Buy extends CyclicBehaviour {
 	final TradingAgent	agent;
 	String				sellerType;
 	final Item			item;
+	MessageTemplate		mt;
 
 	public Buy(TradingAgent agent, String seller, Item item) {
 		this.agent = agent;
 		this.sellerType = seller;
 		this.item = item;
+		mt = MessageTemplate.MatchInReplyTo(item.toString());
 	}
 
 	@Override
 	public void action() {
-		//System.out.println(agent.getName() + " buy " + agent.getQueueSize());
 		try {
 			DFAgentDescription[] sellers = RS.search(agent, sellerType);
 			if (sellers.length > 0) {
 				for (DFAgentDescription ag : sellers) {
 					RS.send(agent, ag.getName(), "", ACLMessage.CFP, item.toString());
-					ACLMessage message = agent.receive(MessageTemplate.MatchInReplyTo(item.toString()));
+					ACLMessage message = agent.receive(mt);
 					if (message != null) {
 						if (message.getPerformative() == ACLMessage.PROPOSE) {
 							synchronized (agent.storage) {

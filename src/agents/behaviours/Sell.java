@@ -7,6 +7,7 @@ import agents.RS;
 import agents.TradingAgent;
 import agents.goods.Item;
 
+@SuppressWarnings("serial")
 public class Sell extends CyclicBehaviour {
 	final TradingAgent	agent;
 	final Item			item;
