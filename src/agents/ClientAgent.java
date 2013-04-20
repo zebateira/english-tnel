@@ -12,17 +12,11 @@ import agents.goods.Item;
 @SuppressWarnings("serial")
 public class ClientAgent extends TradingAgent {
 
-	// método setup
 	protected void setup() {
 		// regista agente no DF
 		try {
 			RS.registerAgent(this, RS.client);
-		}
-		catch (ControllerException e) {
-			e.printStackTrace();
-			return;
-		}
-		catch (FIPAException e) {
+		} catch (ControllerException | FIPAException e) {
 			e.printStackTrace();
 			return;
 		}
@@ -31,7 +25,7 @@ public class ClientAgent extends TradingAgent {
 		for (Object s : getArguments()) {
 			Item item = Item.valueOf((String) s);
 			storage.put(item, 0);
-			addBehaviour(new Buy(this, RS.assembler, item));
+			addBehaviour(new Buy(RS.assembler, item));
 		}
 	}
 
@@ -40,8 +34,8 @@ public class ClientAgent extends TradingAgent {
 		System.out.println(this.getLocalName() + ": " + "Buyer out!\n");
 		try {
 			DFService.deregister(this);
+		} catch (Exception e) {
 		}
-		catch (Exception e) {}
 	}
 
 }

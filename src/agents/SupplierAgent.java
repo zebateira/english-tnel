@@ -1,8 +1,6 @@
 package agents;
 
 import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.wrapper.ControllerException;
 
 import java.util.HashMap;
 
@@ -17,12 +15,7 @@ public class SupplierAgent extends TradingAgent {
 		// regista agente no DF
 		try {
 			RS.registerAgent(this, RS.supplier);
-		}
-		catch (ControllerException e) {
-			e.printStackTrace();
-			return;
-		}
-		catch (FIPAException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
@@ -32,7 +25,7 @@ public class SupplierAgent extends TradingAgent {
 		for (Object s : getArguments()) {
 			Item item = Item.valueOf((String) s);
 			storage.put(item, 3);
-			addBehaviour(new Sell(this, item));
+			addBehaviour(new Sell(item));
 		}
 	}
 
@@ -41,8 +34,8 @@ public class SupplierAgent extends TradingAgent {
 		System.out.println(this.getLocalName() + ": " + "Supplier out!\n");
 		try {
 			DFService.deregister(this);
+		} catch (Exception e) {
 		}
-		catch (Exception e) {}
 	}
 
 }

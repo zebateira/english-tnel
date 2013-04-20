@@ -13,17 +13,12 @@ import agents.goods.Item;
 @SuppressWarnings("serial")
 public class AssemblerAgent extends TradingAgent {
 
-	// método setup
+	// metodo setup
 	protected void setup() {
 		// regista agente no DF
 		try {
 			RS.registerAgent(this, RS.assembler);
-		}
-		catch (ControllerException e) {
-			e.printStackTrace();
-			return;
-		}
-		catch (FIPAException e) {
+		} catch (ControllerException | FIPAException e) {
 			e.printStackTrace();
 			return;
 		}
@@ -32,8 +27,8 @@ public class AssemblerAgent extends TradingAgent {
 		for (Object s : getArguments()) {
 			Item item = Item.valueOf((String) s);
 			storage.put(item, 0);
-			addBehaviour(new Sell(this, item));
-			addBehaviour(new Buy(this, RS.supplier, item));
+			addBehaviour(new Sell(item));
+			addBehaviour(new Buy(RS.supplier, item));
 		}
 	}
 
@@ -42,8 +37,8 @@ public class AssemblerAgent extends TradingAgent {
 		System.out.println(this.getLocalName() + ": " + "Assembler out!\n");
 		try {
 			DFService.deregister(this);
+		} catch (Exception e) {
 		}
-		catch (Exception e) {}
 	}
 
 }
