@@ -1,40 +1,35 @@
-package agents.behaviours;
+package english_auction.behaviours;
 
-import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import java.util.HashMap;
 
-import agents.RS;
-import agents.TradingAgent;
-import agents.goods.Item;
+import english_auction.agents.TradingAgent;
+import english_auction.goods.Item;
 
 @SuppressWarnings("serial")
-public class Sell extends CyclicBehaviour {
-	final Item item;
-	MessageTemplate mt;
+public class Sell extends Transaction {
 
 	public Sell(Item item) {
-		this.item = item;
-
-		mt = MessageTemplate.and(
+		super(item, MessageTemplate.and(
 				MessageTemplate.MatchPerformative(ACLMessage.CFP),
-				MessageTemplate.MatchInReplyTo(item.toString()));
+				MessageTemplate.MatchInReplyTo(item.toString())));
 	}
 
 	@Override
 	public void action() {
 		// System.out.println(this.myAgent.getName() + " sell " +
 		// this.myAgent.getQueueSize());
-		ACLMessage message = this.myAgent.receive(mt);
+		ACLMessage message = this.myAgent.receive(messageTemplate);
 
 		if (message == null) return;
 
 		synchronized (((TradingAgent) this.myAgent).storage) {
 			HashMap<Item, Integer> storage = ((TradingAgent) this.myAgent).storage;
+
 			if (storage.get(item) > 0) {
-				RS.send(this.myAgent, message.getSender(), item.toString(),
+				this.reply(message.getSender(), item.toString(),
 						ACLMessage.PROPOSE, item.toString());
 
 				storage.put(item, storage.get(item) - 1);
@@ -42,8 +37,7 @@ public class Sell extends CyclicBehaviour {
 						+ " Sold, now have " + storage);
 				System.out.flush();
 			} else
-				RS.send(this.myAgent, message.getSender(), "",
-						ACLMessage.INFORM);
+				this.send(message.getSender(), "", ACLMessage.INFORM);
 		}
 	}
 
