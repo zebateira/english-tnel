@@ -20,31 +20,40 @@ public class Buy extends Transaction {
 
 	@Override
 	public void action() {
+
+		try {
+			Thread.sleep(5);
+		}
+		catch (InterruptedException e1) {
+		}
+
 		try {
 			TradingAgent myTradingAgent = (TradingAgent) this.myAgent;
 
-			DFAgentDescription[] sellers = this.search(((BuyerAgent) myTradingAgent)
-					.getMySellerType());
-
+			DFAgentDescription[] sellers = this.search(((BuyerAgent) myTradingAgent).getMySellerType());
+			
 			for (DFAgentDescription agent : sellers) {
-				this.reply(agent.getName(), "",
-						ACLMessage.CFP,
-						item.toString());
+				this.reply(agent.getName(), "", ACLMessage.CFP, item.toString());
 				ACLMessage message = this.myAgent.receive(messageTemplate);
 
-				if (message == null) return;
+				if (message == null)
+					continue;
 
 				if (message.getPerformative() == ACLMessage.PROPOSE) {
 					synchronized (myTradingAgent.storage) {
 						HashMap<Item, Integer> storage = myTradingAgent.storage;
 						storage.put(item, storage.get(item) + 1);
 
-						System.err.println(this.myAgent.getLocalName()
-								+ " Bought, now have" + storage);
+						System.err.println(this.myAgent.getLocalName() + " Bought " + item.name() + ", now have" + storage);
 						System.err.flush();
 					}
 				} else if (message.getPerformative() == ACLMessage.INFORM) {
-					// nao ha nada la...
+					try {
+						Thread.sleep(100);
+					}
+					catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		} catch (FIPAException e) {
