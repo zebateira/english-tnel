@@ -12,15 +12,15 @@ import jade.lang.acl.MessageTemplate;
 import english_auction.agents.AssemblerAgent;
 import english_auction.agents.ClientAgent;
 import english_auction.agents.SupplierAgent;
-import english_auction.goods.Item;
+import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 abstract class Transaction extends CyclicBehaviour {
 
-	protected final Item item;
+	protected final TradableItem item;
 	protected final MessageTemplate messageTemplate;
 
-	protected Transaction(Item item, MessageTemplate messageTemplate) {
+	protected Transaction(TradableItem item, MessageTemplate messageTemplate) {
 		this.item = item;
 		this.messageTemplate = messageTemplate;
 	}

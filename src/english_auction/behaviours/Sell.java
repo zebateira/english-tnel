@@ -2,16 +2,14 @@ package english_auction.behaviours;
 
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-
-import java.util.HashMap;
-
 import english_auction.agents.TradingAgent;
-import english_auction.goods.Item;
+import english_auction.goods.AgentStorage;
+import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class Sell extends Transaction {
 
-	public Sell(Item item) {
+	public Sell(TradableItem item) {
 		super(item, MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString())));
 	}
 
@@ -29,12 +27,12 @@ public class Sell extends Transaction {
 			return;
 
 		synchronized (((TradingAgent) this.myAgent).storage) {
-			HashMap<Item, Integer> storage = ((TradingAgent) this.myAgent).storage;
+			AgentStorage<TradableItem, Integer> storage = ((TradingAgent) this.myAgent).storage;
 
-			if (storage.get(item) > 0) {
+			if (storage.hasAllDependencies(item)) {
 				this.reply(message.getSender(), item.toString(), ACLMessage.PROPOSE, item.toString());
 
-				storage.put(item, storage.get(item) - 1);
+				storage.removeItem(item);
 				System.out.println(this.myAgent.getLocalName() + " Sold " + item.name() + ", now have " + storage);
 				System.out.flush();
 			} else

@@ -1,15 +1,15 @@
 package english_auction.agents;
 
-import english_auction.goods.Item;
+import english_auction.goods.TradableItem;
 
 /**
- * An Agent that buys {@link Item}s from a {@link SellerAgent}.
+ * An Agent that buys {@link TradableItem}s from a {@link SellerAgent}.
  */
 public interface BuyerAgent {
 
 	/**
 	 * Returns the type of the {@link SellerAgent} that the implementing agent
-	 * will buy the {@link Item}s from.
+	 * will buy the {@link TradableItem}s from.
 	 */
 	String getMySellerType();
 

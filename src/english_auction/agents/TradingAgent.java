@@ -5,22 +5,19 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-
-import java.util.HashMap;
-
-import english_auction.goods.Item;
+import english_auction.goods.AgentStorage;
+import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public abstract class TradingAgent extends Agent {
 
-	public HashMap<Item, Integer> storage;
+	public AgentStorage<TradableItem, Integer>	storage;
 
 	@Override
 	protected void setup() {
 		super.setup();
 
-		this.storage = new HashMap<Item, Integer>();
-
+		this.storage = new AgentStorage<TradableItem, Integer>();
 		this.registerAgentOnDF();
 	}
 

@@ -13,18 +13,16 @@ public class Program {
 
 		jadeManager.startNewContainer("container0");
 
-		jadeManager.startNewTradingAgent("container0", "supplier1", SupplierAgent.class, new Object[] { "CPU" });
-		jadeManager.startNewTradingAgent("container0", "supplier2", SupplierAgent.class, new Object[] { "CPU" });
-		jadeManager.startNewTradingAgent("container0", "supplier3", SupplierAgent.class, new Object[] { "MOTHERBOARD" });
-		jadeManager.startNewTradingAgent("container0", "supplier4", SupplierAgent.class, new Object[] { "MOTHERBOARD" });
-		jadeManager.startNewTradingAgent("container0", "supplier5", SupplierAgent.class, new Object[] { "MOTHERBOARD", "CPU" });
+		//MOTHERBOARD, CPU, RAM, GRAPHIC, AUDIO, DRIVES
+		jadeManager.startNewTradingAgent("container0", "supplier1", SupplierAgent.class, new Object[] { "CPU-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier2", SupplierAgent.class, new Object[] { "MOTHERBOARD-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier3", SupplierAgent.class, new Object[] { "GRAPHIC-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier4", SupplierAgent.class, new Object[] { "AUDIO-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier5", SupplierAgent.class, new Object[] { "DRIVES-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier6", SupplierAgent.class, new Object[] { "RAM-s" });
 
-		jadeManager.startNewTradingAgent("container0", "assembler1", AssemblerAgent.class, new Object[] { "CPU" });
-		jadeManager.startNewTradingAgent("container0", "assembler2", AssemblerAgent.class, new Object[] { "CPU" });
-		jadeManager.startNewTradingAgent("container0", "assembler3", AssemblerAgent.class, new Object[] { "MOTHERBOARD" });
-		jadeManager.startNewTradingAgent("container0", "assembler4", AssemblerAgent.class, new Object[] { "MOTHERBOARD" });
-		jadeManager.startNewTradingAgent("container0", "assembler5", AssemblerAgent.class, new Object[] { "CPU", "MOTHERBOARD" });
+		jadeManager.startNewTradingAgent("container0", "assembler", AssemblerAgent.class, new Object[] { "CPU-b", "MOTHERBOARD-b", "GRAPHIC-b", "AUDIO-b", "DRIVES-b", "RAM-b", "COMPUTER-s" });
 
-		jadeManager.startNewTradingAgent("container0", "client", ClientAgent.class, new Object[] { "CPU", "MOTHERBOARD" });
+		jadeManager.startNewTradingAgent("container0", "client", ClientAgent.class, new Object[] { "COMPUTER-b" });
 	}
 }

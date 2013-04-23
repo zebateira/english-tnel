@@ -3,7 +3,7 @@ package english_auction.agents;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import english_auction.behaviours.Sell;
-import english_auction.goods.Item;
+import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class SupplierAgent extends TradingAgent implements SellerAgent {
@@ -16,10 +16,14 @@ public class SupplierAgent extends TradingAgent implements SellerAgent {
 	protected void setup() {
 		super.setup();
 
-		for (Object s : this.getArguments()) {
-			Item item = Item.valueOf((String) s);
+		for (Object s : getArguments()) {
+			String name = (String) s;
+			TradableItem item = TradableItem.valueOf(name.replaceAll("-s", "").replaceAll("-b", ""));
 			this.storage.put(item, 3);
-			this.addBehaviour(new Sell(item));
+			if (name.contains("-s"))
+				addBehaviour(new Sell(item));
+			//if (name.contains("-b"))
+			//	  addBehaviour(new Buy(item));
 		}
 	}
 

@@ -4,7 +4,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import english_auction.behaviours.Buy;
 import english_auction.behaviours.Sell;
-import english_auction.goods.Item;
+import english_auction.goods.TradableItem;
 
 
 @SuppressWarnings("serial")
@@ -19,10 +19,13 @@ public class AssemblerAgent extends TradingAgent implements BuyerAgent, SellerAg
 		super.setup();
 
 		for (Object s : getArguments()) {
-			Item item = Item.valueOf((String) s);
+			String name = (String) s;
+			TradableItem item = TradableItem.valueOf(name.replaceAll("-s", "").replaceAll("-b", ""));
 			this.storage.put(item, 0);
-			addBehaviour(new Sell(item));
-			addBehaviour(new Buy(item));
+			if (name.contains("-s"))
+				addBehaviour(new Sell(item));
+			if (name.contains("-b"))
+				addBehaviour(new Buy(item));
 		}
 	}
 
