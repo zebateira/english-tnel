@@ -17,6 +17,7 @@ public class Run {
 
 	static Runtime										rt;
 	private static String								hostname		= "localhost";
+	private static int									port			= 8888;
 	private static HashMap<String, ContainerController>	containerList	= new HashMap<String, ContainerController>();
 	private static List<AgentController>				agentList;
 
@@ -29,7 +30,8 @@ public class Run {
 		newAgent("container0", "ass", AssemblerAgent.class, new Object[] { "MOTHERBOARD" });
 		newAgent("container0", "cli", ClientAgent.class, new Object[] { "MOTHERBOARD" });
 
-		/*newAgent("container0", "sup2", SupplierAgent.class, new Object[] { "MOTHERBOARD" });
+		/*
+		newAgent("container0", "sup2", SupplierAgent.class, new Object[] { "MOTHERBOARD" });
 		newAgent("container0", "sup3", SupplierAgent.class, new Object[] { "MOTHERBOARD" });
 		newAgent("container0", "sup4", SupplierAgent.class, new Object[] { "CPU" });
 		newAgent("container0", "sup5", SupplierAgent.class, new Object[] { "CPU" });
@@ -37,12 +39,13 @@ public class Run {
 		newAgent("container0", "sup7", SupplierAgent.class, new Object[] { "MOTHERBOARD", "CPU" });
 
 		newAgent("container0", "ass1", AssemblerAgent.class, new Object[] { "MOTHERBOARD", "CPU" });
-		newAgent("container0", "ass2", AssemblerAgent.class, new Object[] { "MOTHERBOARD", "CPU" });*/
+		newAgent("container0", "ass2", AssemblerAgent.class, new Object[] { "MOTHERBOARD", "CPU" });
+		*/
 	}
 
 	private static void emptyPlatform() {
 		rt = Runtime.instance();
-		Profile pMain = new ProfileImpl(hostname, 8888, null);
+		Profile pMain = new ProfileImpl(hostname, port, null);
 		rt.createMainContainer(pMain);
 
 		containerList = new HashMap<String, ContainerController>();
@@ -53,7 +56,7 @@ public class Run {
 		ProfileImpl pContainer;
 		ContainerController containerRef;
 
-		pContainer = new ProfileImpl(null, 8888, null);
+		pContainer = new ProfileImpl(null, port, null);
 		System.out.println("Launching container " + pContainer);
 		containerRef = rt.createAgentContainer(pContainer);
 		containerList.put(name, containerRef);
