@@ -22,7 +22,7 @@ public class ClientAgent extends TradingAgent implements BuyerAgent {
 			//if (name.contains("-s"))
 			//	addBehaviour(new Sell(item));
 			if (name.contains("-b"))
-				addBehaviour(new Buy(item));
+				addBehaviour(new Buy(this, item));
 		}
 	}
 

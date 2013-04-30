@@ -21,7 +21,7 @@ public class SupplierAgent extends TradingAgent implements SellerAgent {
 			TradableItem item = TradableItem.valueOf(name.replaceAll("-s", "").replaceAll("-b", ""));
 			this.storage.put(item, 1);
 			if (name.contains("-s"))
-				addBehaviour(new Sell(item));
+				addBehaviour(new Sell(this, item));
 			//if (name.contains("-b"))
 			//	  addBehaviour(new Buy(item));
 		}

@@ -11,6 +11,7 @@ import jade.lang.acl.ACLMessage;
 import english_auction.agents.AssemblerAgent;
 import english_auction.agents.ClientAgent;
 import english_auction.agents.SupplierAgent;
+import english_auction.agents.TradingAgent;
 import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
@@ -18,9 +19,12 @@ abstract class Transaction extends SimpleBehaviour {
 
 	protected final TradableItem item;
 	protected int					state;
+	public TradingAgent				myTradingAgent;
 
-	protected Transaction(TradableItem item) {
+	protected Transaction(TradingAgent agent, TradableItem item) {
+		super();
 		this.item = item;
+		myTradingAgent = agent;
 	}
 
 	@Override

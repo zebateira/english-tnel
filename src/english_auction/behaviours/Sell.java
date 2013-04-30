@@ -26,12 +26,10 @@ public class Sell extends Transaction {
 	MessageTemplate			cfpMessage				= MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString()));
 	MessageTemplate			replyProposalMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL)), MessageTemplate.MatchInReplyTo(item.toString()));
 
-	TradingAgent			myTradingAgent;
 
-	public Sell(TradableItem item) {
-		super(item);
+	public Sell(TradingAgent agent, TradableItem item) {
+		super(agent, item);
 		state = GET_CFP;
-		myTradingAgent = (TradingAgent) this.myAgent;
 	}
 
 	@Override
@@ -52,7 +50,7 @@ public class Sell extends Transaction {
 					break;
 			}
 
-			Thread.sleep(1000);
+			Thread.sleep(4);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
@@ -77,7 +75,7 @@ public class Sell extends Transaction {
 	 * Definir valor da bid
 	 * */
 	public void state2() {
-		myBid -= new Random().nextInt(10);
+		myBid = sugestedBid - new Random().nextInt(50);
 
 		state = SEND_PROPOSAL;
 	}
@@ -111,7 +109,10 @@ public class Sell extends Transaction {
 			return;
 
 		if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-			// Já comprei =D
+
+			System.err.println(this.myAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
+			System.err.flush();
+
 		}
 		else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
 			AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;

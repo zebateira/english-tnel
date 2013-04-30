@@ -23,13 +23,11 @@ public class Buy extends Transaction {
 	AID						currentBestBidder;
 	DFAgentDescription[]	bidders;
 
-	TradingAgent			myTradingAgent;
 	MessageTemplate			replyMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE)), MessageTemplate.MatchInReplyTo(item.toString()));
 
-	public Buy(TradableItem item) {
-		super(item);
+	public Buy(TradingAgent agent, TradableItem item) {
+		super(agent, item);
 		state = DEFINE_BID;
-		myTradingAgent = (TradingAgent) this.myAgent;
 	}
 
 	@Override
@@ -50,7 +48,7 @@ public class Buy extends Transaction {
 					break;
 			}
 
-			Thread.sleep(1000);
+			Thread.sleep(5);
 		}
 		catch (InterruptedException | FIPAException e) {
 			e.printStackTrace();
@@ -65,6 +63,7 @@ public class Buy extends Transaction {
 		currentBestBid = 100;
 		currentBestBidder = null;
 		state = SEND_CFP;
+		System.out.println("NEW AUCTION");
 	}
 
 	/**
@@ -72,11 +71,14 @@ public class Buy extends Transaction {
 	 * -> CFP(n)
 	 * */
 	public void state2() throws FIPAException {
-		bidders = this.search(((BuyerAgent) myTradingAgent).getMySellerType());
+		BuyerAgent bu = (BuyerAgent) myTradingAgent;
+		bidders = this.search(bu.getMySellerType());
 		for (DFAgentDescription agent : bidders)
 			this.reply(agent.getName(), "" + currentBestBid, ACLMessage.CFP, item.toString());
 		numberOfBidders = bidders.length;
 		state = GET_PROPOSALS;
+
+		System.out.println("AUCTION HAS " + numberOfBidders + " BIDDERS");
 	}
 
 	/**
@@ -91,10 +93,13 @@ public class Buy extends Transaction {
 		if (message.getPerformative() == ACLMessage.PROPOSE) {
 			int proposal = Integer.parseInt(message.getContent());
 
+			System.out.println("NEW BID BY " + message.getSender().getLocalName() + " WITH " + proposal);
+
 			if (proposal < currentBestBid) {
 				currentBestBid = proposal;
 				currentBestBidder = message.getSender();
 			}
+
 		}
 		else if (message.getPerformative() == ACLMessage.INFORM) {
 			// Não tem nada

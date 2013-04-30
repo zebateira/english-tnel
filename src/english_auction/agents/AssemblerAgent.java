@@ -23,9 +23,9 @@ public class AssemblerAgent extends TradingAgent implements BuyerAgent, SellerAg
 			TradableItem item = TradableItem.valueOf(name.replaceAll("-s", "").replaceAll("-b", ""));
 			this.storage.put(item, 0);
 			if (name.contains("-s"))
-				addBehaviour(new Sell(item));
+				addBehaviour(new Sell(this, item));
 			if (name.contains("-b"))
-				addBehaviour(new Buy(item));
+				addBehaviour(new Buy(this, item));
 		}
 	}
 
