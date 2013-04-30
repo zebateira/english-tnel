@@ -21,7 +21,7 @@ public class Program {
 		jadeManager.startNewTradingAgent("container0", "supplier6", SupplierAgent.class, new Object[] { "CPU-s" });
 
 		jadeManager.startNewTradingAgent("container0", "assembler1", AssemblerAgent.class, new Object[] { "CPU-b" });
-		//jadeManager.startNewTradingAgent("container0", "assembler2", AssemblerAgent.class, new Object[] { "CPU-b" });
+		//jadeManager.startNewTradingAgent("container0", "assembler2", AssemblerAgent.class, new Object[] { "RAM-b" });
 
 		//jadeManager.startNewTradingAgent("container0", "client", ClientAgent.class, new Object[] { "COMPUTER-b" });
 	}

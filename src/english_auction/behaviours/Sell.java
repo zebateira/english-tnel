@@ -87,7 +87,6 @@ public class Sell extends Transaction {
 		AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
 		synchronized (storage) {
 			if (storage.hasAllDependencies(item)) {
-
 				this.reply(auctioneer, "" + myBid, ACLMessage.PROPOSE, item.toString());
 
 				if (storage.hasAllDependencies(item))
