@@ -1,47 +1,126 @@
 package english_auction.behaviours;
 
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
+import java.util.Random;
+
 import english_auction.agents.TradingAgent;
 import english_auction.goods.AgentStorage;
 import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class Sell extends Transaction {
-	boolean	objective	= false;
+	public static final int	GET_CFP			= 1;
+	public static final int	DEFINE_BID		= 2;
+	public static final int	SEND_PROPOSAL	= 3;
+	public static final int	GET_REPLY		= 4;
+
+	boolean					objective		= false;
+
+	int						sugestedBid;
+	AID						auctioneer		= null;
+	int						myBid;
+
+	MessageTemplate			cfpMessage				= MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString()));
+	MessageTemplate			replyProposalMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL)), MessageTemplate.MatchInReplyTo(item.toString()));
+
+	TradingAgent			myTradingAgent;
 
 	public Sell(TradableItem item) {
-		super(item, MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString())));
+		super(item);
+		state = GET_CFP;
+		myTradingAgent = (TradingAgent) this.myAgent;
 	}
 
 	@Override
 	public void action() {
-
-		//Ler mensagem
-		ACLMessage message = this.myAgent.receive(messageTemplate);
-		if (message == null)
-			return;
-
-		synchronized (((TradingAgent) this.myAgent).storage) {
-			AgentStorage<TradableItem, Integer> storage = ((TradingAgent) this.myAgent).storage;
-
-			if (storage.hasAllDependencies(item)) {
-				this.reply(message.getSender(), item.toString(), ACLMessage.PROPOSE, item.toString());
-
-				storage.removeItem(item);
-				System.out.println(this.myAgent.getLocalName() + " Sold " + item.name() + ", now have " + storage);
-				System.out.flush();
-			}
-			else
-				this.send(message.getSender(), "", ACLMessage.INFORM);
-		}
-
 		try {
+			switch (state) {
+				case GET_CFP:
+					state1();
+					break;
+				case DEFINE_BID:
+					state2();
+					break;
+				case SEND_PROPOSAL:
+					state3();
+					break;
+				case GET_REPLY:
+					state4();
+					break;
+			}
+
 			Thread.sleep(1000);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Receber CFP
+	 * */
+	public void state1() {
+		ACLMessage message = this.myAgent.receive(cfpMessage);
+		if (message == null)
+			return;
+
+		sugestedBid = Integer.parseInt(message.getContent());
+		auctioneer = message.getSender();
+
+		state = DEFINE_BID;
+	}
+
+	/**
+	 * Definir valor da bid
+	 * */
+	public void state2() {
+		myBid -= new Random().nextInt(10);
+
+		state = SEND_PROPOSAL;
+	}
+
+	/**
+	 * Enviar Proposal
+	 * */
+	public void state3() {
+		AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
+		synchronized (storage) {
+			if (storage.hasAllDependencies(item)) {
+
+				this.reply(auctioneer, "" + myBid, ACLMessage.PROPOSE, item.toString());
+
+				if (storage.hasAllDependencies(item))
+					storage.removeItem(item);
+			}
+			else
+				this.reply(auctioneer, "", ACLMessage.INFORM, item.toString());
+		}
+
+		state = GET_REPLY;
+	}
+
+	/**
+	 * Receber Resposta
+	 * */
+	public void state4() {
+		ACLMessage message = this.myAgent.receive(replyProposalMessage);
+		if (message == null)
+			return;
+
+		if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+			// Já comprei =D
+		}
+		else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+			AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
+			synchronized (storage) {
+				storage.restoreItem(item);
+			}
+		}
+
+		state = GET_CFP;
 	}
 
 	@Override

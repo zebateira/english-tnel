@@ -8,7 +8,6 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import english_auction.agents.AssemblerAgent;
 import english_auction.agents.ClientAgent;
 import english_auction.agents.SupplierAgent;
@@ -18,12 +17,10 @@ import english_auction.goods.TradableItem;
 abstract class Transaction extends SimpleBehaviour {
 
 	protected final TradableItem item;
-	protected final MessageTemplate messageTemplate;
 	protected int					state;
 
-	protected Transaction(TradableItem item, MessageTemplate messageTemplate) {
+	protected Transaction(TradableItem item) {
 		this.item = item;
-		this.messageTemplate = messageTemplate;
 	}
 
 	@Override

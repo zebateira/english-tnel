@@ -12,7 +12,7 @@ import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class Buy extends Transaction {
-	public static final int	START_AUCTION	= 1;
+	public static final int	DEFINE_BID	= 1;
 	public static final int	SEND_CFP		= 2;
 	public static final int	GET_PROPOSALS	= 3;
 	public static final int	SEND_REPLIES	= 4;
@@ -24,10 +24,11 @@ public class Buy extends Transaction {
 	DFAgentDescription[]	bidders;
 
 	TradingAgent			myTradingAgent;
+	MessageTemplate			replyMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE)), MessageTemplate.MatchInReplyTo(item.toString()));
 
 	public Buy(TradableItem item) {
-		super(item, MessageTemplate.MatchInReplyTo(item.toString()));
-		state = START_AUCTION;
+		super(item);
+		state = DEFINE_BID;
 		myTradingAgent = (TradingAgent) this.myAgent;
 	}
 
@@ -35,7 +36,7 @@ public class Buy extends Transaction {
 	public void action() {
 		try {
 			switch (state) {
-				case START_AUCTION:
+				case DEFINE_BID:
 					state1();
 					break;
 				case SEND_CFP:
@@ -73,7 +74,7 @@ public class Buy extends Transaction {
 	public void state2() throws FIPAException {
 		bidders = this.search(((BuyerAgent) myTradingAgent).getMySellerType());
 		for (DFAgentDescription agent : bidders)
-			this.reply(agent.getName(), "", ACLMessage.CFP, item.toString());
+			this.reply(agent.getName(), "" + currentBestBid, ACLMessage.CFP, item.toString());
 		numberOfBidders = bidders.length;
 		state = GET_PROPOSALS;
 	}
@@ -83,7 +84,7 @@ public class Buy extends Transaction {
 	 * <- Propose(n - k) 
 	 * */
 	public void state3() {
-		ACLMessage message = this.myAgent.receive(messageTemplate);
+		ACLMessage message = this.myAgent.receive(replyMessage);
 		if (message == null)
 			return;
 

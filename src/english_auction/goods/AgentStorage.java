@@ -22,4 +22,9 @@ public class AgentStorage<T, Z> extends HashMap {
 			this.put(dep, (int) this.get(dep) - 1);
 		return true;
 	}
+
+	public void restoreItem(TradableItem item) {
+		for (TradableItem dep : item.consumes)
+			this.put(dep, (int) this.get(dep) + 1);
+	}
 }
