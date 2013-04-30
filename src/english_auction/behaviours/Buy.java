@@ -18,13 +18,6 @@ public class Buy extends Transaction {
 
 	@Override
 	public void action() {
-
-		try {
-			Thread.sleep(5);
-		}
-		catch (InterruptedException e1) {
-		}
-
 		try {
 			TradingAgent myTradingAgent = (TradingAgent) this.myAgent;
 
@@ -49,7 +42,9 @@ public class Buy extends Transaction {
 					//nao tem items
 				}
 			}
-		} catch (FIPAException e) {
+			Thread.sleep(5);
+		}
+		catch (InterruptedException | FIPAException e) {
 			e.printStackTrace();
 		}
 	}

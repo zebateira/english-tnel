@@ -15,12 +15,6 @@ public class Sell extends Transaction {
 
 	@Override
 	public void action() {
-		try {
-			Thread.sleep(5);
-		}
-		catch (InterruptedException e1) {
-		}
-
 		ACLMessage message = this.myAgent.receive(messageTemplate);
 
 		if (message == null)
@@ -35,8 +29,16 @@ public class Sell extends Transaction {
 				storage.removeItem(item);
 				System.out.println(this.myAgent.getLocalName() + " Sold " + item.name() + ", now have " + storage);
 				System.out.flush();
-			} else
+			}
+			else
 				this.send(message.getSender(), "", ACLMessage.INFORM);
+		}
+
+		try {
+			Thread.sleep(5);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
