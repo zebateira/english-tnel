@@ -8,6 +8,7 @@ import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class Sell extends Transaction {
+	boolean	objective	= false;
 
 	public Sell(TradableItem item) {
 		super(item, MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString())));
@@ -15,8 +16,9 @@ public class Sell extends Transaction {
 
 	@Override
 	public void action() {
-		ACLMessage message = this.myAgent.receive(messageTemplate);
 
+		//Ler mensagem
+		ACLMessage message = this.myAgent.receive(messageTemplate);
 		if (message == null)
 			return;
 
@@ -35,11 +37,16 @@ public class Sell extends Transaction {
 		}
 
 		try {
-			Thread.sleep(5);
+			Thread.sleep(1000);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean done() {
+		return objective;
 	}
 
 }

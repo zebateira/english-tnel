@@ -43,4 +43,6 @@ public abstract class TradingAgent extends Agent {
 	}
 
 	public abstract String getMyType();
+	
+
 }

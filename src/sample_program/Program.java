@@ -13,9 +13,11 @@ public class Program {
 		jadeManager.startNewContainer("container0");
 
 		//MOTHERBOARD, CPU, RAM, GRAPHIC, AUDIO, DRIVES
-		jadeManager.startNewTradingAgent("container0", "supplier", SupplierAgent.class, new Object[] { "CPU-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier1", SupplierAgent.class, new Object[] { "CPU-s" });
+		jadeManager.startNewTradingAgent("container0", "supplier2", SupplierAgent.class, new Object[] { "CPU-s" });
 
-		jadeManager.startNewTradingAgent("container0", "assembler", AssemblerAgent.class, new Object[] { "CPU-b" });
+		jadeManager.startNewTradingAgent("container0", "assembler1", AssemblerAgent.class, new Object[] { "CPU-b" });
+		//jadeManager.startNewTradingAgent("container0", "assembler2", AssemblerAgent.class, new Object[] { "CPU-b" });
 
 		//jadeManager.startNewTradingAgent("container0", "client", ClientAgent.class, new Object[] { "COMPUTER-b" });
 	}

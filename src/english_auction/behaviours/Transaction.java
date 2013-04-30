@@ -2,7 +2,7 @@ package english_auction.behaviours;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -15,10 +15,11 @@ import english_auction.agents.SupplierAgent;
 import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
-abstract class Transaction extends CyclicBehaviour {
+abstract class Transaction extends SimpleBehaviour {
 
 	protected final TradableItem item;
 	protected final MessageTemplate messageTemplate;
+	protected int					state;
 
 	protected Transaction(TradableItem item, MessageTemplate messageTemplate) {
 		this.item = item;
@@ -80,5 +81,4 @@ abstract class Transaction extends CyclicBehaviour {
 
 		return DFService.search(this.myAgent, dfAgentDescription);
 	}
-
 }
