@@ -48,21 +48,34 @@ public abstract class TradingAgent extends Agent {
 	public abstract String getMyType();
 	
 	public boolean shouldBuy(TradableItem item, int value) {
-
+		//TODO: esta cena
 		return true;
 	}
 
-	public boolean shouldSell(TradableItem item, int value) {
-
+	public boolean shouldSell(TradableItem item, int value, int iterations) {
+		//TODO: esta cena
 		return true;
 	}
 
-	public int buyBid(TradableItem item, int sugestedBid) {
-		return sugestedBid - new Random().nextInt(50);
+	public int buyBid(TradableItem item, int sugestedBid, int iterations) {
+		//TODO: esta cena
+		return sugestedBid - new Random().nextInt(20);
 	}
 
 	public int startingBid(TradableItem item) {
-
+		//TODO: esta cena
 		return 100;
+	}
+
+	public boolean sellerOut(TradableItem item) {
+		//TODO: esta cena
+		return false;
+	}
+
+	public boolean buyerOut(TradableItem item) {
+		//TODO: esta cena
+		int objective = 3;
+
+		return storage.get(item).equals(objective);
 	}
 }

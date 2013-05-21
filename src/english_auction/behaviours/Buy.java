@@ -23,12 +23,13 @@ public class Buy extends Transaction {
 	public static final int	SEND_REPLIES	= 4;
 
 
-	int						objective			= 3;
 	int						currentBestBid;
 	AID						currentBestBidder	= null;
 	ArrayList<AID>			bidders;
 	ArrayList<AID>			newBidders;
 	long					timeout;
+	int						iterations;
+	boolean					newAuction			= true;
 
 
 	MessageTemplate			replyMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE)), MessageTemplate.MatchInReplyTo(item.toString()));
@@ -68,12 +69,16 @@ public class Buy extends Transaction {
 	 * @throws FIPAException 
 	 * */
 	public void state1() {
-		// Se for a ronda inicial, bid=100, senão mantem a bid anterior
-		if (currentBestBidder == null)
+		if (newAuction) {
 			currentBestBid = myTradingAgent.startingBid(item);
+			System.out.println("NEW AUCTION " + myTradingAgent.getLocalName());
+			iterations = JadeManager.STARTING_ITERATIONS;
+			newAuction = false;
+		}
+		iterations--;
 		currentBestBidder = null;
 		state = SEND_CFP;
-		System.out.println("NEW AUCTION " + myTradingAgent.getLocalName() + " -> " + item.toString());
+		System.out.println("ROUND " + iterations + ":  " + myTradingAgent.getLocalName() + " -> " + item.toString());
 	}
 
 	/**
@@ -87,7 +92,7 @@ public class Buy extends Transaction {
 		newBidders = new ArrayList<AID>();
 		for (DFAgentDescription agent : this.search(bu.getMySellerType())) {
 			bidders.add(agent.getName());
-			this.reply(agent.getName(), "" + currentBestBid, ACLMessage.CFP, item.toString());
+			this.reply(agent.getName(), currentBestBid + "@" + iterations, ACLMessage.CFP, item.toString());
 		}
 		state = GET_PROPOSALS;
 		timeout = Calendar.getInstance().getTimeInMillis() + JadeManager.TIMEOUT;
@@ -133,7 +138,7 @@ public class Buy extends Transaction {
 	public void state4() {
 		boolean willBuy = myTradingAgent.shouldBuy(item, currentBestBid);
 		
-		if (currentBestBidder != null && willBuy) {
+		if (currentBestBidder != null && iterations<=0 && willBuy) {
 			synchronized (myTradingAgent.storage) {
 				AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
 				storage.addItem(item);
@@ -142,11 +147,12 @@ public class Buy extends Transaction {
 				System.err.flush();
 
 				this.reply(currentBestBidder, "" + currentBestBid, ACLMessage.ACCEPT_PROPOSAL, item.toString());
+				newAuction = true;
 			}
 		}
-		
-		if(!willBuy)
+		else
 			currentBestBidder = null;
+		
 
 		for (AID agent : bidders) {
 			if (!agent.equals(currentBestBidder))
@@ -159,10 +165,10 @@ public class Buy extends Transaction {
 
 	@Override
 	public boolean done() {
-		AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
-		boolean done = storage.get(item).equals(objective);
+		boolean done = this.myTradingAgent.buyerOut(item);
 		if (done)
-			System.out.println(myTradingAgent.getLocalName() + " buyer out");
+			System.out.println(this.myTradingAgent.getLocalName() + " buyer out");
+
 		return done;
 	}
 
