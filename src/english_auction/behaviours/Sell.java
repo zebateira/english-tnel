@@ -4,8 +4,9 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import java.util.Random;
+import java.util.Calendar;
 
+import english_auction.JadeManager;
 import english_auction.agents.TradingAgent;
 import english_auction.goods.AgentStorage;
 import english_auction.goods.TradableItem;
@@ -17,11 +18,10 @@ public class Sell extends Transaction {
 	public static final int	SEND_PROPOSAL	= 3;
 	public static final int	GET_REPLY		= 4;
 
-	boolean					objective		= false;
-
 	int						sugestedBid;
 	AID						auctioneer		= null;
 	int						myBid;
+	long					timeout;
 
 	MessageTemplate			cfpMessage				= MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString()));
 	MessageTemplate			replyProposalMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL)), MessageTemplate.MatchInReplyTo(item.toString()));
@@ -34,6 +34,7 @@ public class Sell extends Transaction {
 
 	@Override
 	public void action() {
+		//System.out.println(myTradingAgent.getLocalName() + " -> " + item.toString() + " -> " + state);
 		try {
 			switch (state) {
 				case GET_CFP:
@@ -50,7 +51,7 @@ public class Sell extends Transaction {
 					break;
 			}
 
-			Thread.sleep(4);
+			Thread.sleep(10);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
@@ -61,22 +62,23 @@ public class Sell extends Transaction {
 	 * Receber CFP
 	 * */
 	public void state1() {
-		ACLMessage message = this.myAgent.receive(cfpMessage);
+		ACLMessage message = this.myTradingAgent.receive(cfpMessage);
 		if (message == null)
 			return;
 
 		sugestedBid = Integer.parseInt(message.getContent());
 		auctioneer = message.getSender();
 
+		System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
 		state = DEFINE_BID;
+		timeout = Calendar.getInstance().getTimeInMillis() + JadeManager.TIMEOUT;
 	}
 
 	/**
 	 * Definir valor da bid
 	 * */
 	public void state2() {
-		myBid = sugestedBid - new Random().nextInt(50);
-
+		myBid = myTradingAgent.buyBid(item, sugestedBid);
 		state = SEND_PROPOSAL;
 	}
 
@@ -85,8 +87,11 @@ public class Sell extends Transaction {
 	 * */
 	public void state3() {
 		AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
+
+		boolean willSell = myTradingAgent.shouldSell(item, myBid);
+
 		synchronized (storage) {
-			if (storage.hasAllDependencies(item)) {
+			if (storage.hasAllDependencies(item) && willSell) {
 				this.reply(auctioneer, "" + myBid, ACLMessage.PROPOSE, item.toString());
 
 				if (storage.hasAllDependencies(item))
@@ -103,29 +108,31 @@ public class Sell extends Transaction {
 	 * Receber Resposta
 	 * */
 	public void state4() {
-		ACLMessage message = this.myAgent.receive(replyProposalMessage);
-		if (message == null)
-			return;
+		ACLMessage message = this.myTradingAgent.receive(replyProposalMessage);
 
-		if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+		if (message != null) {
+			if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 
-			System.err.println(this.myAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
-			System.err.flush();
+				System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
+				System.err.flush();
 
-		}
-		else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-			AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
-			synchronized (storage) {
-				storage.restoreItem(item);
 			}
+			else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+				AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
+				synchronized (storage) {
+					storage.restoreItem(item);
+				}
+			}
+			state = GET_CFP;
 		}
 
-		state = GET_CFP;
+		if (timeout < Calendar.getInstance().getTimeInMillis())
+			state = GET_CFP;
 	}
 
 	@Override
 	public boolean done() {
-		return objective;
+		return false;
 	}
 
 }

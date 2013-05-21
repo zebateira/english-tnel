@@ -7,7 +7,7 @@ import english_auction.agents.SupplierAgent;
 public class Program {
 
 	public static void main(String[] args) throws InterruptedException {
-
+		
 		JadeManager jadeManager = JadeManager.getInstance();
 
 		jadeManager.startNewContainer("container0");
@@ -18,11 +18,11 @@ public class Program {
 		jadeManager.startNewTradingAgent("container0", "supplier3", SupplierAgent.class, new Object[] { "CPU-s" });
 		jadeManager.startNewTradingAgent("container0", "supplier4", SupplierAgent.class, new Object[] { "CPU-s" });
 		jadeManager.startNewTradingAgent("container0", "supplier5", SupplierAgent.class, new Object[] { "CPU-s" });
-		jadeManager.startNewTradingAgent("container0", "supplier6", SupplierAgent.class, new Object[] { "CPU-s" });
 
-		jadeManager.startNewTradingAgent("container0", "assembler1", AssemblerAgent.class, new Object[] { "CPU-b" });
-		//jadeManager.startNewTradingAgent("container0", "assembler2", AssemblerAgent.class, new Object[] { "RAM-b" });
+		jadeManager.startNewTradingAgent("container0", "assembler1", AssemblerAgent.class, new Object[] { "CPU-b", "CPU-s" });
+		//jadeManager.startNewTradingAgent("container0", "assembler2", AssemblerAgent.class, new Object[] { "CPU-b", "CPU-s" });
+		//jadeManager.startNewTradingAgent("container0", "assembler3", AssemblerAgent.class, new Object[] { "CPU-b", "CPU-s" });
 
-		//jadeManager.startNewTradingAgent("container0", "client", ClientAgent.class, new Object[] { "COMPUTER-b" });
+		//jadeManager.startNewTradingAgent("container0", "client", ClientAgent.class, new Object[] { "CPU-b" });
 	}
 }

@@ -5,6 +5,9 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+
+import java.util.Random;
+
 import english_auction.goods.AgentStorage;
 import english_auction.goods.TradableItem;
 
@@ -44,5 +47,22 @@ public abstract class TradingAgent extends Agent {
 
 	public abstract String getMyType();
 	
+	public boolean shouldBuy(TradableItem item, int value) {
 
+		return true;
+	}
+
+	public boolean shouldSell(TradableItem item, int value) {
+
+		return true;
+	}
+
+	public int buyBid(TradableItem item, int sugestedBid) {
+		return sugestedBid - new Random().nextInt(50);
+	}
+
+	public int startingBid(TradableItem item) {
+
+		return 100;
+	}
 }
