@@ -15,6 +15,7 @@ import english_auction.goods.TradableItem;
 public abstract class TradingAgent extends Agent {
 
 	public AgentStorage<TradableItem, Integer>	storage;
+	public int gold;
 
 	@Override
 	protected void setup() {

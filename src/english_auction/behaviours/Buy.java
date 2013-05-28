@@ -17,7 +17,7 @@ import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class Buy extends Transaction {
-	public static final int	DEFINE_BID			= 1;
+	public static final int	DEFINE_BID		= 1;
 	public static final int	SEND_CFP		= 2;
 	public static final int	GET_PROPOSALS	= 3;
 	public static final int	SEND_REPLIES	= 4;
@@ -28,7 +28,7 @@ public class Buy extends Transaction {
 	ArrayList<AID>			bidders;
 	ArrayList<AID>			newBidders;
 	long					timeout;
-	int						iterations;
+	int						roundNumber;
 	boolean					newAuction			= true;
 
 
@@ -44,15 +44,19 @@ public class Buy extends Transaction {
 		try {
 			switch (state) {
 				case DEFINE_BID:
+//					System.out.println(this + " | DEFINE_BID | state: " + state);
 					state1();
 					break;
 				case SEND_CFP:
+//					System.out.println(this + " | SEND_CFP | state: " + state);
 					state2();
 					break;
 				case GET_PROPOSALS:
+//					System.out.println(this + " | GET_PROPOSALS | state: " + state);
 					state3();
 					break;
 				case SEND_REPLIES:
+//					System.out.println(this + " | SEND_REPLIES | state: " + state);
 					state4();
 					break;
 			}
@@ -65,20 +69,20 @@ public class Buy extends Transaction {
 	}
 
 	/**
-	 * Definir valor inicial do leilão
+	 * Definir valor inicial do leilao
 	 * @throws FIPAException 
 	 * */
 	public void state1() {
 		if (newAuction) {
 			currentBestBid = myTradingAgent.startingBid(item);
 			System.out.println("NEW AUCTION " + myTradingAgent.getLocalName());
-			iterations = JadeManager.STARTING_ITERATIONS;
+			roundNumber = JadeManager.STARTING_ITERATIONS;
 			newAuction = false;
 		}
-		iterations--;
+		roundNumber--;
 		currentBestBidder = null;
 		state = SEND_CFP;
-		System.out.println("ROUND " + iterations + ":  " + myTradingAgent.getLocalName() + " -> " + item.toString());
+		System.out.println("ROUND " + roundNumber + ":  " + myTradingAgent.getLocalName() + " -> " + item.toString());
 	}
 
 	/**
@@ -92,7 +96,7 @@ public class Buy extends Transaction {
 		newBidders = new ArrayList<AID>();
 		for (DFAgentDescription agent : this.search(bu.getMySellerType())) {
 			bidders.add(agent.getName());
-			this.reply(agent.getName(), currentBestBid + "@" + iterations, ACLMessage.CFP, item.toString());
+			this.reply(agent.getName(), currentBestBid + "@" + roundNumber, ACLMessage.CFP, item.toString());
 		}
 		state = GET_PROPOSALS;
 		timeout = Calendar.getInstance().getTimeInMillis() + JadeManager.TIMEOUT;
@@ -120,7 +124,7 @@ public class Buy extends Transaction {
 
 			}
 			else if (message.getPerformative() == ACLMessage.INFORM) {
-				// Não tem nada
+				// Nao tem nada
 			}
 		}
 
@@ -131,19 +135,19 @@ public class Buy extends Transaction {
 	}
 
 	/**
-	 * Responder às Propostas
+	 * Responder as Propostas
 	 * -> Reject (n - k) Fim de turno, Volta a state2
-	 * -> Accept(1) / Reject (n - k - 1) Fim de leilão, Volta a state1
+	 * -> Accept(1) / Reject (n - k - 1) Fim de leilao, Volta a state1
 	 * */
 	public void state4() {
 		boolean willBuy = myTradingAgent.shouldBuy(item, currentBestBid);
 		
-		if (currentBestBidder != null && iterations<=0 && willBuy) {
+		if (currentBestBidder != null && roundNumber<=0 && willBuy) {
 			synchronized (myTradingAgent.storage) {
 				AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
 				storage.addItem(item);
 
-				System.err.println(this.myTradingAgent.getLocalName() + " Bought " + item.name() + " for " + currentBestBid + "$ to " + currentBestBidder.getLocalName() + " , now have" + storage);
+				System.err.println(this.myTradingAgent.getLocalName() + " Bought " + item.name() + " for " + currentBestBid + "$ from " + currentBestBidder.getLocalName() + " , now have" + storage);
 				System.err.flush();
 
 				this.reply(currentBestBidder, "" + currentBestBid, ACLMessage.ACCEPT_PROPOSAL, item.toString());
@@ -166,9 +170,11 @@ public class Buy extends Transaction {
 	@Override
 	public boolean done() {
 		boolean done = this.myTradingAgent.buyerOut(item);
-		if (done)
-			System.out.println(this.myTradingAgent.getLocalName() + " buyer out");
-
+		if (done) {
+			System.err.println(this.myTradingAgent.getLocalName() + " buyer out | storage: " + this.myTradingAgent.storage);
+			System.err.flush();
+		}
+		
 		return done;
 	}
 

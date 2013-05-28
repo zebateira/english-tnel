@@ -19,12 +19,14 @@ public class Sell extends Transaction {
 	public static final int	SEND_PROPOSAL	= 3;
 	public static final int	GET_REPLY		= 4;
 
+	private static final boolean	NEXT_READY	= true;
+	
 	int						sugestedBid;
 	int						myBid;
 	ArrayList<AID>			auctioneers;
 	long					timeout;
 	long					auctionTimeout;
-	int						iterations;
+	int						roundNumber;
 	boolean					newAuction				= true;
 
 	MessageTemplate			cfpMessage				= MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString()));
@@ -40,22 +42,40 @@ public class Sell extends Transaction {
 	@Override
 	public void action() {
 		//System.out.println(myTradingAgent.getLocalName() + " -> " + item.toString() + " -> " + state);
+		
+		// is behaviour ready for next state
+		boolean nextReady = true;
+		
 		try {
-			switch (state) {
+			switch (state) { 
 				case GET_CFP:
 					state1();
 					break;
 				case DEFINE_BID:
 					for (AID auc : auctioneers)
-						state2(auc);
+						nextReady &= state2(auc);
+					
+					if( nextReady )
+						this.state = SEND_PROPOSAL;
+//					System.out.println(this + " | DEFINE_BID | next state: " + state);
 					break;
 				case SEND_PROPOSAL:
 					for (AID auc : auctioneers)
-						state3(auc);
+						nextReady &= state3(auc);
+					
+					if( nextReady )
+						this.state = GET_REPLY;
+//					System.out.println(this + " | SEND_PROPOSAL | next state: " + state);
 					break;
 				case GET_REPLY:
 					for (AID auc : auctioneers)
-						state4(auc);
+						nextReady &= state4(auc);
+
+					if( nextReady ) {
+						this.state = GET_CFP;
+//						auctioneers = new ArrayList<AID>();
+					}
+//					System.out.println(this + " | GET_REPLY | state: " + state);
 					break;
 			}
 
@@ -74,15 +94,16 @@ public class Sell extends Transaction {
 
 		if (message != null) {
 			String[] msg = message.getContent().split("@");
-			iterations = Integer.parseInt(msg[1]);
+			roundNumber = Integer.parseInt(msg[1]);
 
 			sugestedBid = Integer.parseInt(msg[0]);
 			AID auctioneer = message.getSender();
 
-			if (iterations == 2) {
+			if (roundNumber == 2) {
 				if (newAuction) {
 					auctionTimeout = Calendar.getInstance().getTimeInMillis() + JadeManager.AUCTION_TIMEOUT;
 					newAuction = false;
+					auctioneers = new ArrayList<AID>();
 				}
 
 				auctioneers.add(auctioneer);
@@ -98,42 +119,48 @@ public class Sell extends Transaction {
 
 	/**
 	 * Definir valor da bid
+	 * @return 
 	 * */
-	public void state2(AID auctioneer) {
-		myBid = myTradingAgent.buyBid(item, sugestedBid, iterations);
-		state = SEND_PROPOSAL;
+	public boolean state2(AID auctioneer) {
+		myBid = myTradingAgent.buyBid(item, sugestedBid, roundNumber);
+//		state = SEND_PROPOSAL;
+		
+		return NEXT_READY;
 	}
 
 	/**
 	 * Enviar Proposal
 	 * */
-	public void state3(AID auctioneer) {
+	public boolean state3(AID auctioneer) {
 		AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
 
-		boolean willSell = myTradingAgent.shouldSell(item, myBid, iterations);
+		boolean willSell = myTradingAgent.shouldSell(item, myBid, roundNumber);
 
 		synchronized (storage) {
 			if (storage.hasAllDependencies(item) && willSell) {
 				this.reply(auctioneer, "" + myBid, ACLMessage.PROPOSE, item.toString());
 
-				if (storage.hasAllDependencies(item))
+				if (storage.hasAllDependencies(item)) {
 					storage.removeItem(item);
+				}
 			}
 			else
 				this.reply(auctioneer, "", ACLMessage.INFORM, item.toString());
 		}
 
-		state = GET_REPLY;
+//		state = GET_REPLY;
+		return NEXT_READY;
 	}
 
 	/**
 	 * Receber Resposta
 	 * */
-	public void state4(AID auctioneer) {
+	public boolean state4(AID auctioneer) {
 		ACLMessage message = this.myTradingAgent.receive(replyProposalMessage);
+		boolean isReady = false;
 
 		if (message != null) {
-			if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && iterations <= 0) {
+			if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && roundNumber <= 0) {
 
 				System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
 				System.err.flush();
@@ -145,7 +172,8 @@ public class Sell extends Transaction {
 					storage.restoreItem(item);
 				}
 			}
-			state = GET_CFP;
+//			state = GET_CFP;
+			isReady = true;
 		}
 
 		if (timeout < Calendar.getInstance().getTimeInMillis()) {
@@ -153,9 +181,12 @@ public class Sell extends Transaction {
 			synchronized (storage) {
 				storage.restoreItem(item);
 			}
-			state = GET_CFP;
+//			state = GET_CFP;
 			newAuction = true;
+			isReady = true;
 		}
+		
+		return isReady;
 	}
 
 	@Override
