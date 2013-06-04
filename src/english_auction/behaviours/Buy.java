@@ -106,7 +106,7 @@ public class Buy extends Transaction {
 
 				int proposal = Integer.parseInt(message.getContent());
 
-				System.out.println(myTradingAgent.getLocalName() + " -> NEW BID BY " + message.getSender().getLocalName() + " WITH " + proposal);
+				//System.out.println(myTradingAgent.getLocalName() + " -> NEW BID BY " + message.getSender().getLocalName() + " WITH " + proposal);
 
 				if (proposal <= currentBestBid) {
 					currentBestBid = proposal;

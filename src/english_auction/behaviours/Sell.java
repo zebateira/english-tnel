@@ -70,7 +70,7 @@ public class Sell extends Transaction {
 		sugestedBid = Integer.parseInt(message.getContent());
 		auctioneer = message.getSender();
 
-		System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
+		//System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
 		state = DEFINE_BID;
 		timeout = Calendar.getInstance().getTimeInMillis() + JadeManager.TIMEOUT;
 	}
