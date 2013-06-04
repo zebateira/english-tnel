@@ -22,6 +22,7 @@ public class Sell extends Transaction {
 	AID						auctioneer		= null;
 	int						myBid;
 	long					timeout;
+	boolean					reserved;
 
 	MessageTemplate			cfpMessage				= MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString()));
 	MessageTemplate			replyProposalMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL)), MessageTemplate.MatchInReplyTo(item.toString()));
@@ -93,9 +94,8 @@ public class Sell extends Transaction {
 		synchronized (storage) {
 			if (storage.hasAllDependencies(item) && willSell) {
 				this.reply(auctioneer, "" + myBid, ACLMessage.PROPOSE, item.toString());
-
-				if (storage.hasAllDependencies(item))
-					storage.removeItem(item);
+				storage.removeItem(item);
+				reserved = true;
 			}
 			else
 				this.reply(auctioneer, "", ACLMessage.INFORM, item.toString());
@@ -115,24 +115,20 @@ public class Sell extends Transaction {
 
 				System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
 				System.err.flush();
+				reserved = false;
 
 			}
-			else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-				AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
-				synchronized (storage) {
-					storage.restoreItem(item);
+			else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL && reserved) {
+				synchronized (myTradingAgent.storage) {
+					myTradingAgent.storage.restoreItem(item);
 				}
+				reserved = false;
 			}
 			state = GET_CFP;
 		}
 
 		if (timeout < Calendar.getInstance().getTimeInMillis())
 			state = GET_CFP;
-	}
-
-	@Override
-	public boolean done() {
-		return false;
 	}
 
 }

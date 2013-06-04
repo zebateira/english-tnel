@@ -29,6 +29,7 @@ public class Buy extends Transaction {
 	ArrayList<AID>			bidders;
 	ArrayList<AID>			newBidders;
 	long					timeout;
+	int						quiters;
 
 
 	MessageTemplate			replyMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE)), MessageTemplate.MatchInReplyTo(item.toString()));
@@ -68,10 +69,9 @@ public class Buy extends Transaction {
 	 * @throws FIPAException 
 	 * */
 	public void state1() {
-		// Se for a ronda inicial, bid=100, senão mantem a bid anterior
-		if (currentBestBidder == null)
-			currentBestBid = myTradingAgent.startingBid(item);
+		currentBestBid = myTradingAgent.startingBid(item);
 		currentBestBidder = null;
+		quiters = 0;
 		state = SEND_CFP;
 		System.out.println("NEW AUCTION " + myTradingAgent.getLocalName() + " -> " + item.toString());
 	}
@@ -108,18 +108,18 @@ public class Buy extends Transaction {
 
 				System.out.println(myTradingAgent.getLocalName() + " -> NEW BID BY " + message.getSender().getLocalName() + " WITH " + proposal);
 
-				if (proposal < currentBestBid) {
+				if (proposal <= currentBestBid) {
 					currentBestBid = proposal;
 					currentBestBidder = message.getSender();
 				}
 
 			}
 			else if (message.getPerformative() == ACLMessage.INFORM) {
-				// Não tem nada
+				quiters++;
 			}
 		}
 
-		if (bidders.size() == newBidders.size() || timeout < Calendar.getInstance().getTimeInMillis()) {
+		if (bidders.size() == newBidders.size() + quiters || timeout < Calendar.getInstance().getTimeInMillis()) {
 			state = SEND_REPLIES;
 			bidders = newBidders;
 		}
@@ -144,9 +144,6 @@ public class Buy extends Transaction {
 				this.reply(currentBestBidder, "" + currentBestBid, ACLMessage.ACCEPT_PROPOSAL, item.toString());
 			}
 		}
-		
-		if(!willBuy)
-			currentBestBidder = null;
 
 		for (AID agent : bidders) {
 			if (!agent.equals(currentBestBidder))
@@ -155,15 +152,4 @@ public class Buy extends Transaction {
 
 		state = DEFINE_BID;
 	}
-
-
-	@Override
-	public boolean done() {
-		AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
-		boolean done = storage.get(item).equals(objective);
-		if (done)
-			System.out.println(myTradingAgent.getLocalName() + " buyer out");
-		return done;
-	}
-
 }
