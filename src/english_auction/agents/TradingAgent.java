@@ -8,6 +8,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.Random;
 
+import english_auction.JadeManager;
 import english_auction.goods.AgentStorage;
 import english_auction.goods.TradableItem;
 
@@ -15,6 +16,7 @@ import english_auction.goods.TradableItem;
 public abstract class TradingAgent extends Agent {
 
 	public AgentStorage<TradableItem, Integer>	storage;
+	public int									gold;
 
 	@Override
 	protected void setup() {
@@ -48,21 +50,28 @@ public abstract class TradingAgent extends Agent {
 	public abstract String getMyType();
 	
 	public boolean shouldBuy(TradableItem item, int value) {
-
-		return true;
+		return gold >= value;
 	}
 
 	public boolean shouldSell(TradableItem item, int value) {
-
 		return true;
 	}
 
-	public int buyBid(TradableItem item, int sugestedBid) {
-		return sugestedBid - new Random().nextInt(50);
+	public int buyBid(TradableItem item, int sugestedBid, int round) {
+		if (round > 0)
+			return sugestedBid - JadeManager.MIN_WAGE;
+		return sugestedBid - new Random().nextInt(10);
 	}
 
 	public int startingBid(TradableItem item) {
+		return item.value;
+	}
 
-		return 100;
+	public boolean buyerOut() {
+		return false;
+	}
+
+	public boolean sellerOut() {
+		return false;
 	}
 }

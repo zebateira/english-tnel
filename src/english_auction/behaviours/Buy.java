@@ -152,6 +152,7 @@ public class Buy extends Transaction {
 			synchronized (myTradingAgent.storage) {
 				AgentStorage<TradableItem, Integer> storage = myTradingAgent.storage;
 				storage.addItem(item);
+				myTradingAgent.gold -= currentBestBid;
 
 				System.err.println(this.myTradingAgent.getLocalName() + " Bought " + item.name() + " for " + currentBestBid + "$ to " + currentBestBidder.getLocalName() + " , now have" + storage);
 				System.err.flush();
@@ -169,5 +170,10 @@ public class Buy extends Transaction {
 		}
 
 		state = DEFINE_BID;
+	}
+
+	@Override
+	public boolean done() {
+		return newAuction && myTradingAgent.buyerOut();
 	}
 }

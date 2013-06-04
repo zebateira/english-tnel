@@ -2,7 +2,7 @@ package english_auction.behaviours;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -15,7 +15,7 @@ import english_auction.agents.TradingAgent;
 import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
-abstract class Transaction extends CyclicBehaviour {
+abstract class Transaction extends SimpleBehaviour {
 
 	protected final TradableItem item;
 	protected int					state;

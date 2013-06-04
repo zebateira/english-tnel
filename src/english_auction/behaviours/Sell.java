@@ -71,7 +71,7 @@ public class Sell extends Transaction {
 		sugestedBid = Integer.parseInt(message.getContent().split("@")[1]);
 		auctioneer = message.getSender();
 
-		System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
+		//System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
 		state = DEFINE_BID;
 		timeout = Calendar.getInstance().getTimeInMillis() + JadeManager.TIMEOUT;
 	}
@@ -80,7 +80,7 @@ public class Sell extends Transaction {
 	 * Definir valor da bid
 	 * */
 	public void state2() {
-		myBid = myTradingAgent.buyBid(item, sugestedBid);
+		myBid = myTradingAgent.buyBid(item, sugestedBid, round);
 		state = SEND_PROPOSAL;
 	}
 
@@ -114,26 +114,32 @@ public class Sell extends Transaction {
 		ACLMessage message = this.myTradingAgent.receive(replyProposalMessage);
 
 		if (message != null) {
-			if (round <= 0) {
+			if (round <= 0 && reserved) {
 				if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 
+					myTradingAgent.gold += myBid;
+					
 					System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
 					System.err.flush();
-					reserved = false;
 
 				}
-				else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL && reserved) {
+				else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
 					synchronized (myTradingAgent.storage) {
 						myTradingAgent.storage.restoreItem(item);
 					}
-					reserved = false;
 				}
+				reserved = false;
 			}
 			state = GET_CFP;
 		}
 
 		if (timeout < Calendar.getInstance().getTimeInMillis())
 			state = GET_CFP;
+	}
+
+	@Override
+	public boolean done() {
+		return !reserved && myTradingAgent.sellerOut();
 	}
 
 }

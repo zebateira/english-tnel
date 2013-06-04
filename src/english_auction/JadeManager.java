@@ -22,6 +22,7 @@ public class JadeManager {
 
 	public static final int						TIMEOUT	= 1000;
 	public static final int						ROUNDS	= 5;
+	public static final int						MIN_WAGE	= 2;
 
 	/**
 	 * Singleton instance.

@@ -20,6 +20,7 @@ public class SupplierAgent extends TradingAgent implements SellerAgent {
 			String name = (String) s;
 			TradableItem item = TradableItem.valueOf(name.replaceAll("-s", "").replaceAll("-b", ""));
 			this.storage.put(item, 1);
+			gold = 0;
 			if (name.contains("-s"))
 				addBehaviour(new Sell(this, item));
 			//if (name.contains("-b"))
