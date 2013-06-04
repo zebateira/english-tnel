@@ -13,20 +13,20 @@ import english_auction.goods.TradableItem;
 
 @SuppressWarnings("serial")
 public class Sell extends Transaction {
-	public static final int	GET_CFP			= 1;
-	public static final int	DEFINE_BID		= 2;
-	public static final int	SEND_PROPOSAL	= 3;
-	public static final int	GET_REPLY		= 4;
+	public static final int	GET_CFP					= 1;
+	public static final int	DEFINE_BID				= 2;
+	public static final int	SEND_PROPOSAL			= 3;
+	public static final int	GET_REPLY				= 4;
 
 	int						sugestedBid;
-	AID						auctioneer		= null;
+	AID						auctioneer				= null;
 	int						myBid;
 	long					timeout;
+	int						round;
 	boolean					reserved;
 
 	MessageTemplate			cfpMessage				= MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchInReplyTo(item.toString()));
 	MessageTemplate			replyProposalMessage	= MessageTemplate.and(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL)), MessageTemplate.MatchInReplyTo(item.toString()));
-
 
 	public Sell(TradingAgent agent, TradableItem item) {
 		super(agent, item);
@@ -67,10 +67,11 @@ public class Sell extends Transaction {
 		if (message == null)
 			return;
 
-		sugestedBid = Integer.parseInt(message.getContent());
+		round = Integer.parseInt(message.getContent().split("@")[0]);
+		sugestedBid = Integer.parseInt(message.getContent().split("@")[1]);
 		auctioneer = message.getSender();
 
-		//System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
+		System.out.println(myTradingAgent.getLocalName() + " received from " + auctioneer.getLocalName() + " for " + item.toString() + " with " + sugestedBid);
 		state = DEFINE_BID;
 		timeout = Calendar.getInstance().getTimeInMillis() + JadeManager.TIMEOUT;
 	}
@@ -92,10 +93,12 @@ public class Sell extends Transaction {
 		boolean willSell = myTradingAgent.shouldSell(item, myBid);
 
 		synchronized (storage) {
-			if (storage.hasAllDependencies(item) && willSell) {
+			if ((reserved || storage.hasAllDependencies(item)) && willSell) {
 				this.reply(auctioneer, "" + myBid, ACLMessage.PROPOSE, item.toString());
-				storage.removeItem(item);
-				reserved = true;
+				if (!reserved) {
+					storage.removeItem(item);
+					reserved = true;
+				}
 			}
 			else
 				this.reply(auctioneer, "", ACLMessage.INFORM, item.toString());
@@ -111,18 +114,20 @@ public class Sell extends Transaction {
 		ACLMessage message = this.myTradingAgent.receive(replyProposalMessage);
 
 		if (message != null) {
-			if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+			if (round <= 0) {
+				if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 
-				System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
-				System.err.flush();
-				reserved = false;
+					System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
+					System.err.flush();
+					reserved = false;
 
-			}
-			else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL && reserved) {
-				synchronized (myTradingAgent.storage) {
-					myTradingAgent.storage.restoreItem(item);
 				}
-				reserved = false;
+				else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL && reserved) {
+					synchronized (myTradingAgent.storage) {
+						myTradingAgent.storage.restoreItem(item);
+					}
+					reserved = false;
+				}
 			}
 			state = GET_CFP;
 		}

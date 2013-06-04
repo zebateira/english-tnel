@@ -21,6 +21,7 @@ import english_auction.agents.TradingAgent;
 public class JadeManager {
 
 	public static final int						TIMEOUT	= 1000;
+	public static final int						ROUNDS	= 5;
 
 	/**
 	 * Singleton instance.
