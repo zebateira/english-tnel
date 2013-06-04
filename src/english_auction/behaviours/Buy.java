@@ -154,7 +154,7 @@ public class Buy extends Transaction {
 				storage.addItem(item);
 				myTradingAgent.gold -= currentBestBid;
 
-				System.err.println(this.myTradingAgent.getLocalName() + " Bought " + item.name() + " for " + currentBestBid + "$ to " + currentBestBidder.getLocalName() + " , now have" + storage);
+				System.err.println(this.myTradingAgent.getLocalName() + " Bought " + item.name() + " for " + currentBestBid + "$ to " + currentBestBidder.getLocalName() + " , now have" + storage + " and $" + myTradingAgent.gold);
 				System.err.flush();
 
 				this.reply(currentBestBidder, "" + currentBestBid, ACLMessage.ACCEPT_PROPOSAL, item.toString());

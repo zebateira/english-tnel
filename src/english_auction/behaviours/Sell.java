@@ -119,7 +119,7 @@ public class Sell extends Transaction {
 
 					myTradingAgent.gold += myBid;
 					
-					System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage);
+					System.err.println(this.myTradingAgent.getLocalName() + " Sold " + item.name() + " for " + myBid + "$ to " + auctioneer.getLocalName() + " , now have" + myTradingAgent.storage + " and $" + myTradingAgent.gold);
 					System.err.flush();
 
 				}

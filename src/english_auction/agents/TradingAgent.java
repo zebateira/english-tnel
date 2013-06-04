@@ -60,7 +60,13 @@ public abstract class TradingAgent extends Agent {
 	public int buyBid(TradableItem item, int sugestedBid, int round) {
 		if (round > 0)
 			return sugestedBid - JadeManager.MIN_WAGE;
-		return sugestedBid - new Random().nextInt(10);
+		
+		if(this.getLocalName().equals("half"))
+			return sugestedBid - (int) (((double) sugestedBid) / 2);
+		else if (this.getLocalName().equals("greedy"))
+			return sugestedBid - JadeManager.MIN_WAGE;
+
+		return sugestedBid - (int) (((double) sugestedBid) * (new Random().nextDouble() * 2 / 3));
 	}
 
 	public int startingBid(TradableItem item) {
